@@ -16,8 +16,7 @@ public class ProductsServiceMap implements ProductsService {
 
     @Override
     public Product save(Product product) {
-        persistence.save(product);
-        return product;
+        return persistence.save(product);
     }
 
     @Override

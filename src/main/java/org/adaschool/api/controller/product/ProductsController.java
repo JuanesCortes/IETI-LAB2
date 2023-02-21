@@ -2,7 +2,9 @@ package org.adaschool.api.controller.product;
 
 import org.adaschool.api.exception.ProductNotFoundException;
 import org.adaschool.api.repository.product.Product;
+import org.adaschool.api.repository.product.ProductDto;
 import org.adaschool.api.service.product.ProductsService;
+import org.adaschool.api.service.product.productpesistance.ProductPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +18,8 @@ import java.util.Optional;
 public class ProductsController {
 
     private final ProductsService productsService;
-
+    @Autowired
+    ProductPersistence ps;
     public ProductsController(@Autowired ProductsService productsService) {
         this.productsService = productsService;
     }
@@ -24,6 +27,9 @@ public class ProductsController {
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         URI createdProductUri = URI.create("");
+        if(!productsService.findById(product.getId()).isEmpty()){
+            throw new ProductNotFoundException(product.getId());
+        }
         productsService.save(product);
         return ResponseEntity.created(createdProductUri).body(null);
     }
@@ -43,15 +49,16 @@ public class ProductsController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Product> updateProduct(@RequestBody Product product, @PathVariable("id") String id) {
-
-        try{
-            productsService.findById(id).get().equals(product);
-        }catch(Exception e){
+    public ResponseEntity<Product> updateProduct(@RequestBody ProductDto product, @PathVariable("id") String id) {
+        Product pr = new Product(product);
+        Optional<Product> prod = productsService.findById(id);
+        if(prod.isPresent()){
+            productsService.update(pr,id);
+            productsService.save(prod.get());
+            return ResponseEntity.ok(pr);
+        }else {
             throw new ProductNotFoundException(id);
         }
-
-        return ResponseEntity.ok(productsService.update(product,id));
     }
 
     @DeleteMapping("{id}")

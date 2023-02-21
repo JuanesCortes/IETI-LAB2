@@ -1,6 +1,6 @@
 package org.adaschool.api.service.product.productpesistance;
 
-import org.adaschool.api.exception.ProductNotFoundException;
+
 import org.adaschool.api.repository.product.Product;
 import org.springframework.stereotype.Component;
 
@@ -10,11 +10,11 @@ import java.util.List;
 @Component
 public class ProductPersistence {
 
-    private HashMap<String,Product> products;
+    private static HashMap<String,Product> products = new HashMap<String,Product>();
 
-    public void save(Product p) {
+    public Product save(Product p) {
         String id = p.getId();
-        products.put(id, p);
+        return products.put(id, p);
     }
     public Product getProductById(String id){
         return products.get(id);
@@ -29,8 +29,8 @@ public class ProductPersistence {
     }
 
     public Product updateProduct(Product p, String id){
-            products.remove(id);
-            products.put(id, p);
+        products.remove(id);
+        products.put(id,p);
         return p;
     }
 }
